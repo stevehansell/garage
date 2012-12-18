@@ -1,17 +1,27 @@
 describe('Garage', function() {
 
-	afterEach(function() {
-		Garage.blacklistedItems = null;
+	beforeEach(function() {
+		spyOn(Garage, 'trigger');
 	});
 	
-	it('sets a localStorage item to track stored items and timestamps', function() {
-		expect(localStorage.getItem('GARAGEITEMS')).not.toBe(null);
+	afterEach(function() {
+		Garage.blacklistedItems = null;
+		localStorage.clear();
+	});
+	
+	describe('on load', function() {
+		it('sets a localStorage item to cache items and timestamps', function() {
+			expect(localStorage.getItem('GARAGEITEMS')).not.toBe(null);
+		});
+	
+		it('stores the cache in memory on load', function() {
+			localStorage.setItem('GARAGEITEMS', JSON.stringify({foo: 'bar'}));
+			spyOn(Garage, 'getJSON').andCallThrough();
+			expect(Garage.cache).toBeDefined();
+		});
 	});
 	
 	describe('add', function() {
-		beforeEach(function() {
-			spyOn(Garage, 'trigger');
-		});
 		it('adds items to localStorage', function() {
 			Garage.add('foo', 'bar');
 			expect(localStorage.getItem('foo')).toBe('bar');
@@ -100,6 +110,28 @@ describe('Garage', function() {
 			Garage.addToBlacklist('baz');
 			expect(Garage.blacklistedItems[0]).toBe('baz');
 			expect(Garage.blacklistedItems.length).toBe(1);
+		});
+	});
+	
+	describe('addToCache', function() {
+		it('adds a newly added storage item to the cache with a timestamp', function() {
+			spyOn(Date, 'now').andReturn(1355798955678);
+			spyOn(localStorage, 'setItem');
+			
+			Garage.addToCache('foo');
+			
+			expect(Garage.cache.foo).toBe(1355798955678)
+			expect(localStorage.setItem).toHaveBeenCalledWith('GARAGEITEMS', jasmine.any(String));
+		});
+	});
+	
+	describe('removeFromCache', function() {
+		it('removes an item from the cache', function() {
+			Garage.addToCache('bar');
+			
+			Garage.removeFromCache('bar');
+			
+			expect(Garage.cache.bar).not.toBeDefined();
 		});
 	});
 	

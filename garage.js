@@ -23,6 +23,7 @@
 		return localStorage.getItem(key);
 	};
 	
+	// Get localStorage as JSON
 	Garage.getJSON = function(key) {
 		return JSON.parse(this.get(key));
 	};
@@ -30,6 +31,7 @@
 	// Wraps localStorage.removeItem
 	Garage.remove = function(key) {
 		localStorage.removeItem(key);
+		this.trigger('remove', [key]);
 	};
 	
 	// Removes all items from localStorage
@@ -50,10 +52,12 @@
 		}
 	};
 	
+	// List of keys that will be deleted on Garage.clean()
 	Garage.setBlacklist = function(keys) {
 		this.blacklistedItems = keys;
 	};
 	
+	// Add additional keys to the blacklist array
 	Garage.addToBlacklist = function(key) {
 		if (!this.blacklistedItems) {
 			if (typeof key === 'string') key = [key];
@@ -61,6 +65,18 @@
 		} else {
 			this.blacklistedItems.push(key);
 		}
+	};
+	
+	// Adds a key and timestamp to the cache property and stores in localStorage
+	Garage.addToCache = function(key) {
+		Garage.cache[key] = Date.now();
+		localStorage.setItem(Garage.ITEMSKEY, JSON.stringify(Garage.cache));
+	};
+	
+	// Removes a key and its timestamp from the cache object and updates localStorage
+	Garage.removeFromCache = function(key) {
+		delete Garage.cache[key];
+		localStorage.setItem(Garage.ITEMSKEY, JSON.stringify(Garage.cache));
 	};
 	
 	// Triggers events namespaced with 'garage:'. Not fully implemented
@@ -74,15 +90,22 @@
 	
 	
 	// Event listeners
-	
 	root.addEventListener('garage:add', function(e) {
-		console.log(e.args, +new Date())
+		Garage.addToCache.apply(Garage, e.args);
+	});
+	
+	root.addEventListener('garage:remove', function(e) {
+		Garage.removeFromCache.apply(Garage, e.args);
 	});
 	
 	// Setup localStorage to track added items and timestamps
 	if (Garage.get(Garage.ITEMSKEY) === null) {
 		// Dont use Garage.add here to avoid the garage:add event
-		localStorage.setItem(Garage.ITEMSKEY, undefined);
+		localStorage.setItem(Garage.ITEMSKEY, JSON.stringify({}));
 	}
 	
+	// Get the tracked items from localStorage and store in memory
+	Garage.cache = Garage.getJSON(Garage.ITEMSKEY);
+	
+
 }).call(this);
