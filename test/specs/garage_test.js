@@ -2,6 +2,7 @@ describe('Garage', function() {
 
 	beforeEach(function() {
 		spyOn(Garage, 'trigger');
+		Garage.cache = {};
 	});
 	
 	afterEach(function() {
@@ -136,10 +137,33 @@ describe('Garage', function() {
 	});
 	
 	it('sets cache expiration', function() {
-		expect(Garage.CACHEEXPIRATIONTIME).toBe(7);
+		expect(Garage.CACHEEXPIRATIONDAYS).toBe(7);
 		
-		Garage.setCacheExpirationTime(4);
-		expect(Garage.CACHEEXPIRATIONTIME).toBe(4);
+		Garage.setCACHEEXPIRATIONDAYS(4);
+		expect(Garage.CACHEEXPIRATIONDAYS).toBe(4);
+		
+		Garage.setCACHEEXPIRATIONDAYS(7); // Cleanup
+	});
+	
+	describe('expire', function() {
+		it('removes keys that are older than the cache expiration time', function() {
+			// Setup
+			localStorage.clear();
+			var validTime = 1355801635253;
+			var expiredTime = 1355110435253;
+			var deadline = + new Date(validTime - (1000 * 60 * 60 * 24 * Garage.CACHEEXPIRATIONDAYS))
+			localStorage.setItem('foo', 'bar');
+			localStorage.setItem('bar', 'baz');
+			Garage.cache = {'foo': validTime, 'bar': expiredTime};
+			localStorage.setItem(Garage.CACHEKEY, JSON.stringify({'foo': validTime, 'bar': expiredTime}));
+			spyOn(Garage, 'remove').andCallThrough();
+			spyOn(Garage, '_expirationTimeInMS').andReturn(deadline);
+			
+			Garage.expire();
+			
+			expect(Garage.remove).toHaveBeenCalledWith('bar');
+			expect(Garage.get(Garage.CACHEKEY).bar).not.toBeDefined();
+		});
 	});
 	
 });

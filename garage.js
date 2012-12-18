@@ -11,8 +11,8 @@
 	// Key to use for storing Garage tracking info
 	Garage.CACHEKEY = 'GARAGEITEMS';
 	
-	// Default cache expiration time. Override with Garage.setCacheExpirationTime
-	Garage.CACHEEXPIRATIONTIME = 7;
+	// Default cache expiration time. Override with Garage.setCACHEEXPIRATIONDAYS
+	Garage.CACHEEXPIRATIONDAYS = 7;
 	
 	// Wraps localStorage.setItem
 	Garage.add = function(key, value) {
@@ -70,9 +70,21 @@
 		}
 	};
 	
-	Garage.setCacheExpirationTime = function(timeInDays) {
+	// Overrides the default CACHEEXPIRATIONDAYS value
+	Garage.setCACHEEXPIRATIONDAYS = function(timeInDays) {
 		if (typeof timeInDays === 'string') timeInDays = parseInt(timeInDays);
-		Garage.CACHEEXPIRATIONTIME = timeInDays;
+		this.CACHEEXPIRATIONDAYS = timeInDays;
+	};
+	
+	// Removes all expired keys from storage
+	Garage.expire = function() {
+		var expTime;
+		for (key in this.cache) {
+			expTime = this.cache[key];
+			if (expTime < this._expirationTimeInMS()) {
+				this.remove(key);
+			}
+		}
 	};
 	
 	// Adds a key and timestamp to the cache property and stores in localStorage
@@ -96,6 +108,9 @@
 		root.dispatchEvent(evt);
 	};
 	
+	Garage._expirationTimeInMS = function() {
+		return (Date.now() - 1000 * 60 * 60 * 24 * Garage.CACHEEXPIRATIONDAYS);
+	};
 	
 	// Event listeners
 	root.addEventListener('garage:add', function(e) {
