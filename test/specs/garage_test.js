@@ -61,10 +61,12 @@ describe('Garage', function() {
 		expect(localStorage.removeItem).toHaveBeenCalledWith('foo');
 	});
 	
-	it('removes all items from localStorage', function() {
+	it('removes all items from localStorage and cleans the cache', function() {
 		spyOn(localStorage, 'clear');
+		spyOn(Garage, '_setupCache');
 		Garage.empty();
 		expect(localStorage.clear).toHaveBeenCalled();
+		expect(Garage._setupCache).toHaveBeenCalled();
 	});
 	
 	describe('clean', function() {

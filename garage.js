@@ -40,6 +40,7 @@
 	// Removes all items from localStorage
 	Garage.empty = function() {
 		localStorage.clear();
+		this._setupCache();
 	};
 	
 	// Removes items from localStorage from a blacklist. If a blacklist
@@ -112,6 +113,17 @@
 		return (Date.now() - 1000 * 60 * 60 * 24 * Garage.CACHEEXPIRATIONDAYS);
 	};
 	
+	Garage._setupCache = function() {
+		// Setup localStorage to track added items and timestamps
+		if (Garage.get(Garage.CACHEKEY) === null) {
+			// Dont use Garage.add here to avoid the garage:add event
+			localStorage.setItem(Garage.CACHEKEY, JSON.stringify({}));
+		}
+
+		// Get the tracked items from localStorage and store in memory
+		Garage.cache = Garage.getJSON(Garage.CACHEKEY);
+	};
+	
 	// Event listeners
 	root.addEventListener('garage:add', function(e) {
 		Garage.addToCache.apply(Garage, e.args);
@@ -121,13 +133,6 @@
 		Garage.removeFromCache.apply(Garage, e.args);
 	});
 	
-	// Setup localStorage to track added items and timestamps
-	if (Garage.get(Garage.CACHEKEY) === null) {
-		// Dont use Garage.add here to avoid the garage:add event
-		localStorage.setItem(Garage.CACHEKEY, JSON.stringify({}));
-	}
-	
-	// Get the tracked items from localStorage and store in memory
-	Garage.cache = Garage.getJSON(Garage.CACHEKEY);
+	Garage._setupCache();
 
 }).call(this);
