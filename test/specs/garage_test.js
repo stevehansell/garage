@@ -39,13 +39,18 @@ describe('Garage', function() {
 			expect(Garage.trigger).toHaveBeenCalledWith('add', jasmine.any(Array));
 		});
 		
-		xit('handles quota_exceeded exceptions', function() {
+		it('handles quota_exceeded exceptions', function() {
 			// Force localStorage.setItem to throw an error to mock out of memory
+			var quotaExceeded = false;
 			spyOn(localStorage, 'setItem').andCallFake(function() {
-				throw new Error("QUOTA_EXCEEDED_ERR", "QUOTA_EXCEEDED_ERR: DOM Exception 22");
+				if (!quotaExceeded) {
+					throw new Error("QUOTA_EXCEEDED_ERR", "QUOTA_EXCEEDED_ERR: DOM Exception 22");
+				}
 			});
-			spyOn(Garage, 'clean');
-			// spyOn(Garage, 'add');
+			spyOn(Garage, 'clean').andCallFake(function() {
+				quotaExceeded = true;
+			});
+			spyOn(Garage, 'add').andCallThrough();
 			
 			expect(function() {
 				Garage.add('foo', 'EXCEED QUOTA');
