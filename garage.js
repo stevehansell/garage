@@ -17,8 +17,14 @@
 	// Wraps localStorage.setItem
 	Garage.add = function(key, value) {
 		if (typeof value === 'object') value = JSON.stringify(value);
-		localStorage.setItem(key, value);
-		this.trigger('add', [key]);
+		
+		try {
+			localStorage.setItem(key, value);
+			this.trigger('add', [key]);
+		} catch(e) {
+			this.clean();
+			this.add(key, value);
+		}
 	};
 	
 	// Wraps localStorage.getItem

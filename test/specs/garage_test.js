@@ -34,9 +34,25 @@ describe('Garage', function() {
 			expect(JSON.stringify).toHaveBeenCalled();
 		});
 		
-		it('triggers an garage:add event', function() {
+		it('triggers a garage:add event', function() {
 			Garage.add('foo', 'bar');
 			expect(Garage.trigger).toHaveBeenCalledWith('add', jasmine.any(Array));
+		});
+		
+		xit('handles quota_exceeded exceptions', function() {
+			// Force localStorage.setItem to throw an error to mock out of memory
+			spyOn(localStorage, 'setItem').andCallFake(function() {
+				throw new Error("QUOTA_EXCEEDED_ERR", "QUOTA_EXCEEDED_ERR: DOM Exception 22");
+			});
+			spyOn(Garage, 'clean');
+			// spyOn(Garage, 'add');
+			
+			expect(function() {
+				Garage.add('foo', 'EXCEED QUOTA');
+			}).not.toThrow();
+			
+			expect(Garage.clean).toHaveBeenCalled();
+			expect(Garage.add.callCount).toBe(2);
 		});
 	});
 
