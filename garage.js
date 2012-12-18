@@ -80,6 +80,7 @@
 	// Removes all expired keys from storage
 	Garage.expire = function() {
 		var expTime;
+		this._updateCache();
 		for (key in this.cache) {
 			expTime = this.cache[key];
 			if (expTime < this._expirationTimeInMS()) {
@@ -109,18 +110,22 @@
 		root.dispatchEvent(evt);
 	};
 	
+	// Returns the time that the cache should expire
 	Garage._expirationTimeInMS = function() {
 		return (Date.now() - 1000 * 60 * 60 * 24 * Garage.CACHEEXPIRATIONDAYS);
 	};
-	
+
+	// Setup localStorage to track added items and timestamps	
 	Garage._setupCache = function() {
-		// Setup localStorage to track added items and timestamps
 		if (Garage.get(Garage.CACHEKEY) === null) {
 			// Dont use Garage.add here to avoid the garage:add event
 			localStorage.setItem(Garage.CACHEKEY, JSON.stringify({}));
 		}
-
-		// Get the tracked items from localStorage and store in memory
+		this._updateCache();
+	};
+	
+	// Get the tracked items from localStorage and store in memory
+	Garage._updateCache = function() {
 		Garage.cache = Garage.getJSON(Garage.CACHEKEY);
 	};
 	
@@ -133,6 +138,7 @@
 		Garage.removeFromCache.apply(Garage, e.args);
 	});
 	
+	// Setup cache on load
 	Garage._setupCache();
 
 }).call(this);

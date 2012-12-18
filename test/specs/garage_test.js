@@ -166,6 +166,12 @@ describe('Garage', function() {
 			expect(Garage.remove).toHaveBeenCalledWith('bar');
 			expect(Garage.get(Garage.CACHEKEY).bar).not.toBeDefined();
 		});
+		
+		it('updates the cache before expiring', function() {
+			spyOn(Garage, '_updateCache');
+			Garage.expire();
+			expect(Garage._updateCache).toHaveBeenCalled();
+		});
 	});
 	
 });
