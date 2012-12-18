@@ -135,4 +135,11 @@ describe('Garage', function() {
 		});
 	});
 	
+	it('sets cache expiration', function() {
+		expect(Garage.CACHEEXPIRATIONTIME).toBe(7);
+		
+		Garage.setCacheExpirationTime(4);
+		expect(Garage.CACHEEXPIRATIONTIME).toBe(4);
+	});
+	
 });

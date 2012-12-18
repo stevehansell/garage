@@ -9,7 +9,10 @@
 	}
 	
 	// Key to use for storing Garage tracking info
-	Garage.ITEMSKEY = 'GARAGEITEMS';
+	Garage.CACHEKEY = 'GARAGEITEMS';
+	
+	// Default cache expiration time. Override with Garage.setCacheExpirationTime
+	Garage.CACHEEXPIRATIONTIME = 7;
 	
 	// Wraps localStorage.setItem
 	Garage.add = function(key, value) {
@@ -67,16 +70,21 @@
 		}
 	};
 	
+	Garage.setCacheExpirationTime = function(timeInDays) {
+		if (typeof timeInDays === 'string') timeInDays = parseInt(timeInDays);
+		Garage.CACHEEXPIRATIONTIME = timeInDays;
+	};
+	
 	// Adds a key and timestamp to the cache property and stores in localStorage
 	Garage.addToCache = function(key) {
 		Garage.cache[key] = Date.now();
-		localStorage.setItem(Garage.ITEMSKEY, JSON.stringify(Garage.cache));
+		localStorage.setItem(Garage.CACHEKEY, JSON.stringify(Garage.cache));
 	};
 	
 	// Removes a key and its timestamp from the cache object and updates localStorage
 	Garage.removeFromCache = function(key) {
 		delete Garage.cache[key];
-		localStorage.setItem(Garage.ITEMSKEY, JSON.stringify(Garage.cache));
+		localStorage.setItem(Garage.CACHEKEY, JSON.stringify(Garage.cache));
 	};
 	
 	// Triggers events namespaced with 'garage:'. Not fully implemented
@@ -99,13 +107,12 @@
 	});
 	
 	// Setup localStorage to track added items and timestamps
-	if (Garage.get(Garage.ITEMSKEY) === null) {
+	if (Garage.get(Garage.CACHEKEY) === null) {
 		// Dont use Garage.add here to avoid the garage:add event
-		localStorage.setItem(Garage.ITEMSKEY, JSON.stringify({}));
+		localStorage.setItem(Garage.CACHEKEY, JSON.stringify({}));
 	}
 	
 	// Get the tracked items from localStorage and store in memory
-	Garage.cache = Garage.getJSON(Garage.ITEMSKEY);
-	
+	Garage.cache = Garage.getJSON(Garage.CACHEKEY);
 
 }).call(this);
