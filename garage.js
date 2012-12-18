@@ -47,7 +47,7 @@
 	// is not specified, it removes all items.
 	Garage.clean = function() {
 		if (!this.blacklistedItems || this.blacklistedItems.length === 0) {
-			Garage.empty();
+			this.empty();
 			return;
 		}
 		
@@ -91,14 +91,14 @@
 	
 	// Adds a key and timestamp to the cache property and stores in localStorage
 	Garage.addToCache = function(key) {
-		Garage.cache[key] = Date.now();
-		localStorage.setItem(Garage.CACHEKEY, JSON.stringify(Garage.cache));
+		this.cache[key] = Date.now();
+		localStorage.setItem(this.CACHEKEY, JSON.stringify(this.cache));
 	};
 	
 	// Removes a key and its timestamp from the cache object and updates localStorage
 	Garage.removeFromCache = function(key) {
-		delete Garage.cache[key];
-		localStorage.setItem(Garage.CACHEKEY, JSON.stringify(Garage.cache));
+		delete this.cache[key];
+		localStorage.setItem(this.CACHEKEY, JSON.stringify(this.cache));
 	};
 	
 	// Triggers events namespaced with 'garage:'. Not fully implemented
@@ -112,21 +112,26 @@
 	
 	// Returns the time that the cache should expire
 	Garage._expirationTimeInMS = function() {
-		return (Date.now() - 1000 * 60 * 60 * 24 * Garage.CACHEEXPIRATIONDAYS);
+		return (Date.now() - 1000 * 60 * 60 * 24 * this.CACHEEXPIRATIONDAYS);
+	};
+
+	// Helper to get the cache as JSON
+	Garage._getCache = function() {
+		return this.getJSON(this.CACHEKEY);
 	};
 
 	// Setup localStorage to track added items and timestamps	
 	Garage._setupCache = function() {
-		if (Garage.get(Garage.CACHEKEY) === null) {
+		if (this.get(this.CACHEKEY) === null) {
 			// Dont use Garage.add here to avoid the garage:add event
-			localStorage.setItem(Garage.CACHEKEY, JSON.stringify({}));
+			localStorage.setItem(this.CACHEKEY, JSON.stringify({}));
 		}
 		this._updateCache();
 	};
 	
 	// Get the tracked items from localStorage and store in memory
 	Garage._updateCache = function() {
-		Garage.cache = Garage.getJSON(Garage.CACHEKEY);
+		this.cache = this.getJSON(this.CACHEKEY);
 	};
 	
 	// Event listeners
