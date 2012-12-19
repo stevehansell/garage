@@ -162,10 +162,10 @@ describe('Garage', function() {
 	it('sets cache expiration', function() {
 		expect(Garage.CACHEEXPIRATIONDAYS).toBe(7);
 		
-		Garage.setCACHEEXPIRATIONDAYS(4);
+		Garage.setCacheExpirationDays(4);
 		expect(Garage.CACHEEXPIRATIONDAYS).toBe(4);
 		
-		Garage.setCACHEEXPIRATIONDAYS(7); // Cleanup
+		Garage.setCacheExpirationDays(7); // Cleanup
 	});
 	
 	describe('expire', function() {

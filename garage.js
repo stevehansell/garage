@@ -78,7 +78,7 @@
 	};
 	
 	// Overrides the default CACHEEXPIRATIONDAYS value
-	Garage.setCACHEEXPIRATIONDAYS = function(timeInDays) {
+	Garage.setCacheExpirationDays = function(timeInDays) {
 		if (typeof timeInDays === 'string') timeInDays = parseInt(timeInDays);
 		this.CACHEEXPIRATIONDAYS = timeInDays;
 	};
